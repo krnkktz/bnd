@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+int MARGIN=15;
+
 int main(int argc, char ** argv){
         /* basic window information */
         int width, height;
@@ -16,15 +18,12 @@ int main(int argc, char ** argv){
         GC pen;
         XSetWindowAttributes att;
         XGCValues values;
-
-        /* color */
-        Colormap cmap;
-        XColor xc, xc2;
+        int screen;
 
         /* font */
         XFontStruct *font;
         char * text = "marin@thinkpad:";
-        int text_width;
+        int text_width, text_height;
         int textx, texty;
 
 
@@ -35,30 +34,29 @@ int main(int argc, char ** argv){
                 fprintf(stderr, "unable to connect to display\n");\
                         return 7;
         }
+        screen = DefaultScreen(dpy);
 
         /* pen setup */
-        cmap = DefaultColormap(dpy, DefaultScreen(dpy));
-        XAllocNamedColor(dpy, cmap, "Red", &xc, &xc2);
-        values.foreground = xc.pixel;
-        values.line_width = 1;
-        values.line_style = LineSolid;
+        values.foreground = XWhitePixel(dpy, screen);
 
         /* font setup */
         font = XLoadQueryFont(dpy, "fixed");
         values.font = font->fid;
         text_width = XTextWidth(font, text, strlen(text));
+        text_height = font->ascent;
 
         /* window setup */
 
-        width = 400;
-        height = 400;
+        width = text_width+MARGIN;
+        height = text_height+MARGIN;
 
         att.override_redirect = True;
+        att.background_pixel = XBlackPixel(dpy,screen);
 
 
         /* window creation */
         win = XCreateWindow(dpy, DefaultRootWindow(dpy), 10,10, width, height,
-                        0, CopyFromParent, CopyFromParent, CopyFromParent, CWOverrideRedirect, &att);
+                        0, CopyFromParent, InputOutput, CopyFromParent, CWBackPixel|CWOverrideRedirect, &att);
 
         XSelectInput(dpy, win, ButtonPressMask|StructureNotifyMask);
 
@@ -66,34 +64,17 @@ int main(int argc, char ** argv){
 
 
         /* pen creation */
-        pen = XCreateGC(dpy, win, GCForeground|GCLineWidth|GCLineStyle|GCFont, &values);
+        pen = XCreateGC(dpy, win, GCForeground|GCFont, &values);
 
         printf("main loop...\n");
 
-        while (1) {
+        textx = (width - text_width)/2;
+        texty = (height + font->ascent)/2;
+        XDrawString(dpy, win, pen, textx, texty, text, strlen(text));
+
+        while(1) {
                 XNextEvent(dpy, &ev);
                 switch(ev.type){
-                        case Expose:
-                                printf("Expose!\n");
-                                XDrawLine(dpy, win, pen, 0, 0, width, height);
-                                XDrawLine(dpy, win, pen, width, 0, 0, height);
-                                break;
-                        case ConfigureNotify:
-                                if (width != ev.xconfigure.width
-                                                || height != ev.xconfigure.height) {
-                                        width = ev.xconfigure.width;
-                                        height = ev.xconfigure.height;
-                                        XClearWindow(dpy, ev.xany.window);
-                                        printf("Size changed to: %d by %d\n", width, height);
-                                }
-                                XDrawLine(dpy, win, pen, 0, 0, width/2-text_width/2, height/2);
-                                XDrawLine(dpy, win, pen, width, 0, width/2+text_width/2, height/2);
-                                XDrawLine(dpy, win, pen, 0, height, width/2-text_width/2, height/2);
-                                XDrawLine(dpy, win, pen, width, height, width/2+text_width/2, height/2);
-                                textx = (width - text_width)/2;
-                                texty = (height + font->ascent)/2;
-                                XDrawString(dpy, ev.xany.window, pen, textx, texty, text, strlen(text));
-                                break;
                         case ButtonPress:
                                 XCloseDisplay(dpy);
                                 return 0;
