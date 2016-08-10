@@ -75,6 +75,8 @@ int main(int argc, char** argv) {
 
         write(sfd, sarg, strlen(sarg) + 1);
 
+        free(sarg);
+
         close(sfd);
 
         return EXIT_SUCCESS;

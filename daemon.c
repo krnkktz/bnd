@@ -12,10 +12,11 @@
 
 #include "notify.h"
 
-void sigchld_handler(void);
+void sigchld_handler(int);
 
 
-void sigchld_handler(void) {
+void sigchld_handler(int a) {
+        (void)(a);
         wait(NULL);
 }
 
