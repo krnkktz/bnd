@@ -8,50 +8,9 @@
 
 int MARGIN=15;
 
-/*int utf8toXChar2b(XChar2b*, int, const char*, int);*/
-
 XFontSet getFont(Display*);
 
 void print_help(_IO_FILE*);
-
-/*
-int utf8toXChar2b(XChar2b* output_r, int outsize, const char* input, int inlen) {
-        int j, k;
-        for (j = 0; j < inlen && k < outsize; ++j) {
-                unsigned char c = input[j];
-                if (c < 128) {
-                        output_r[k].byte1 = 0;
-                        output_r[k].byte2 = c;
-                        ++k;
-                } else if (c < 0xC0) {
-                        continue;
-                } else switch (c&0xF0) {
-                        case 0xC0: case 0xD0:
-                                if (inlen < j + 1) {
-                                        return k;
-                                }
-                                output_r[k].byte1 = (c&0x1c) >> 2;
-                                ++j;
-                                output_r[k].byte2 = ((c&0x3) << 6) + (input[k]&0x3F);
-                                ++k;
-                                break;
-                        case 0xE0:
-                                if (inlen < j+2) {
-                                        return k;
-                                }
-                                ++j;
-                                output_r[k].byte1 = ((c&0xF) << 4) + ((input[j]&0x3C) >> 2);
-                                c = input[j];
-                                ++j;
-                                output_r[k].byte2 = ((c&0x3) << 6) + (input[j]&0x3F);
-                                ++k;
-                                break;
-                        case 0xFF:
-                                continue;
-                }
-        }
-        return k;
-}*/
 
 XFontSet getFont(Display* dpy) {
         XFontSet font = NULL;
