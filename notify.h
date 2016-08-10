@@ -1,7 +1,13 @@
 #ifndef NOTIFY_H
 #define NOTIFY_H
 
-void notify(char*);
+#include <X11/Xlib.h>
+
+XFontSet getFont(Display*);
+
+void print_help(_IO_FILE*);
+
+int notify(char*);
 
 #endif
 

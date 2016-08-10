@@ -1,4 +1,4 @@
-- daemon so we can stack the notifications
+- stack the notifications (keep track of still alive children)
 - note daemon pid for stop
 - usage, help, --start, --stop
 - error log

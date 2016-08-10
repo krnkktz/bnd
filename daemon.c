@@ -117,8 +117,7 @@ int main(void) {
                 }
 
                 if (process_id == 0) {
-                        notify(buffer);
-                        return EXIT_SUCCESS;
+                        return notify(buffer);
                 }
 
                 close(cfd);
