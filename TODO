@@ -1,7 +1,4 @@
-- change the background color with the command line
-- change the text with the command line
-- think about whether we need a daemon or not - it would be kind of nice but
-  not really useful on the other hand, except if the notifications have to come
-  back, but i guess that will be decided after some days of using the program.
-- maybe daemon so we can stack the notifications? or is there a ~/.bndtmp (nice!)
-  somewhere?
+- daemon so we can stack the notifications
+- note daemon pid for stop
+- usage, help, --start, --stop
+- error log
