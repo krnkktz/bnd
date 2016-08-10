@@ -1,20 +1,29 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <signal.h>
 #include <errno.h>
 
-void notify(char* arg) {
-        fprintf(stdout, "%s\n", arg);
+#include "notify.h"
+
+void sigchld_handler(void);
+
+
+void sigchld_handler(void) {
+        wait(NULL);
 }
 
-int main(int argc, char* argv[]) {
+int main(void) {
         /* forking */
         pid_t process_id = 0;
         pid_t sid = 0;
+        struct sigaction newaction;
 
         /* client communication */
         struct sockaddr_un addr;
@@ -75,18 +84,33 @@ int main(int argc, char* argv[]) {
                 return EXIT_FAILURE;
         }
 
+        /* handling children */
+        newaction.sa_handler = sigchld_handler;
+        sigemptyset(&newaction.sa_mask);
+        newaction.sa_flags = 0;
+        sigaction(SIGCHLD, &newaction, NULL);
+
+        /* main loop */
+
         while (1) {
                 cfd = accept(sfd, NULL, NULL);
                 if (cfd < 0) {
-                        fprintf(stderr, "failed to accept connection.\n");
-                        return EXIT_FAILURE;
+                        if (errno != EINTR) {
+                                fprintf(stderr, "failed to accept connection");
+                                fprintf(stderr, " (errno %d)\n", errno);
+                                return EXIT_FAILURE;
+                        }
+                        continue;
                 }
+
                 rfd = read(cfd, buffer, 1023);
                 if (rfd < 0) {
                         fprintf(stderr, "failed to read from buffer.\n");
                         return EXIT_FAILURE;
                 }
+
                 process_id = fork();
+
                 if (process_id < 0) {
                         fprintf(stderr, "failed to fork for notification.\n");
                 }
@@ -96,9 +120,9 @@ int main(int argc, char* argv[]) {
                         return EXIT_SUCCESS;
                 }
 
-                fprintf(stdout, "created notification process with pid %d\n",
-                                process_id);
                 close(cfd);
         }
+
         return EXIT_SUCCESS;
 }
+
