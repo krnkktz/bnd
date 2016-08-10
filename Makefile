@@ -18,5 +18,9 @@ daemon: $(SOURCES_D)
 	$(CC) $(SOURCES_D) $(FLAGS) -o $(OUTPUT_D)
 
 clean:
-	rm -fv $(OUTPUT_C) $(OUTPUT_D)
+	@rm -fv $(OUTPUT_C) $(OUTPUT_D)
+
+install:
+	@cp -v $(OUTPUT_C) /usr/local/bin/bnd
+	@cp -v $(OUTPUT_D) /usr/local/bin/bndd
 
