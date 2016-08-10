@@ -7,9 +7,16 @@
 
 int MARGIN=15;
 
+void print_help(void) {
+        printf("help coming soon\n");
+}
+
 int main(int argc, char ** argv){
-        /* basic window information */
-        int width, height;
+        /* argv parser stuff */
+        int i;
+
+        /* window information */
+        int width, height, screen;
 
         /* xlib stuff */
         Window win;
@@ -17,31 +24,56 @@ int main(int argc, char ** argv){
         Display *dpy;
         GC pen;
         XSetWindowAttributes att;
-        XGCValues values;
-        int screen;
+        XGCValues val;
+        XColor col, dummy;
+        char * bg_col = "black";
 
-        /* font */
+        /* text */
         XFontStruct *font;
-        char * text = "marin@thinkpad:";
+        char * text = "";
         int text_width, text_height;
         int textx, texty;
 
+
+        /* argv parser */
+
+        for (i = 1; i < argc; ++i) {
+                if (strcmp(argv[i], "-h") == 0
+                                || strcmp(argv[i], "--help") == 0) {
+                        print_help();
+                        return EXIT_SUCCESS;
+                } else if (strcmp(argv[i], "-b") == 0
+                                || strcmp(argv[i], "--background") == 0) {
+                        if (++i < argc) {
+                                bg_col = argv[i];
+                        } else {
+                                printf("usage:\n");
+                                print_help();
+                                return EXIT_FAILURE;
+                        }
+                } else {
+                        text = argv[i];
+                }
+        }
+
+
+        fprintf("color: %s\n", bg_col);
 
         /* display setup */
 
         dpy = XOpenDisplay(NULL);
         if (!dpy) {
                 fprintf(stderr, "unable to connect to display\n");\
-                        return 7;
+                        return EXIT_FAILURE;
         }
         screen = DefaultScreen(dpy);
 
         /* pen setup */
-        values.foreground = XWhitePixel(dpy, screen);
+        val.foreground = XWhitePixel(dpy, screen);
 
         /* font setup */
         font = XLoadQueryFont(dpy, "fixed");
-        values.font = font->fid;
+        val.font = font->fid;
         text_width = XTextWidth(font, text, strlen(text));
         text_height = font->ascent;
 
@@ -51,7 +83,9 @@ int main(int argc, char ** argv){
         height = text_height+MARGIN;
 
         att.override_redirect = True;
-        att.background_pixel = XBlackPixel(dpy,screen);
+
+        XAllocNamedColor(dpy, DefaultColormap(dpy, screen), bg_col, &col, &dummy);
+        att.background_pixel = col.pixel;
 
 
         /* window creation */
@@ -64,20 +98,22 @@ int main(int argc, char ** argv){
 
 
         /* pen creation */
-        pen = XCreateGC(dpy, win, GCForeground|GCFont, &values);
+        pen = XCreateGC(dpy, win, GCForeground|GCFont, &val);
 
-        printf("main loop...\n");
 
+        /* text writing */
         textx = (width - text_width)/2;
         texty = (height + font->ascent)/2;
         XDrawString(dpy, win, pen, textx, texty, text, strlen(text));
 
+
+        /* waiting for the end */
         while(1) {
                 XNextEvent(dpy, &ev);
                 switch(ev.type){
                         case ButtonPress:
                                 XCloseDisplay(dpy);
-                                return 0;
+                                return EXIT_SUCCESS;
                 }
         }
 }
