@@ -5,3 +5,4 @@
 - think about security (installation? escaping stuff? maybe some sort of
   protection against too many requests? (eg no more than 15 windows at once))
 - configure socket placement, log placement, etc.
+- find out why there are still zombies

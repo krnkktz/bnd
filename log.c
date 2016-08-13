@@ -1,22 +1,27 @@
 #include <stdio.h>
 #include <time.h>
+#include <stdarg.h>
 
 #include "log.h"
 
-void wlog(char* message) {
+void w_log(const char* message, ...) {
+        va_list argp;
         time_t t = time(NULL);
         struct tm* lt = localtime(&t);
-        FILE* logfile = fopen("/home/marin/.bnd/bnd.log", "a");
+        char ts[20];
+
+        FILE* logfile = fopen("/home/marin/.bnd/log", "a");
 
         if (!logfile) {
                 fprintf(stderr, "ERROR: unable to open log file.\n");
                 return;
         }
 
-        fprintf(logfile, "%d/%d/%d %d:%d:%d: ", lt->tm_year + 1900,
-                        lt->tm_mon + 1, lt->tm_mday,
-                        lt->tm_hour, lt->tm_min, lt->tm_sec);
-        fprintf(logfile, message);
+        strftime(ts, 20, "%Y/%m/%d %H:%M:%S", lt);
+        fprintf(logfile, "%s: ", ts);
+        va_start(argp, message);
+        vfprintf(logfile, message, argp);
+        va_end(argp);
         fprintf(logfile, "\n");
         fclose(logfile);
 }

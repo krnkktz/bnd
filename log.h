@@ -1,4 +1,4 @@
 #include <stdio.h>
 
-void wlog(char*);
+void w_log(const char*, ...);
 

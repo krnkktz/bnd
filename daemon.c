@@ -36,15 +36,14 @@ int main(void) {
         process_id = fork();
 
         if (process_id < 0) {
-                fprintf(stderr, "failed to create child process.\n");
-                wlog("ERROR: failed to create child process.");
+                w_log("ERROR: failed to create child process.");
                 return EXIT_FAILURE;
         }
 
         if (process_id > 0) {
                 fprintf(stdout, "created child process with pid %d.\n",
                                 process_id);
-                wlog("created child process."); /* tell the pid!! */
+                w_log("created child process with pid %d.", process_id);
                 return EXIT_SUCCESS;
         }
 
@@ -52,7 +51,7 @@ int main(void) {
 
         if (sid < 0) {
                 fprintf(stderr, "failed to set sid.\n");
-                wlog("ERROR: failed to set sid.");
+                w_log("ERROR: failed to set sid.");
                 return EXIT_FAILURE;
         }
 
@@ -67,7 +66,7 @@ int main(void) {
 
         if (sfd < 0) {
                 fprintf(stderr, "failed to create socket.\n");
-                wlog("ERROR: failed to create socket.");
+                w_log("ERROR: failed to create socket.");
                 return EXIT_FAILURE;
         }
 
@@ -81,13 +80,13 @@ int main(void) {
         if (bind(sfd, (struct sockaddr *) &addr,
                                 sizeof(struct sockaddr_un)) < 0) {
                 fprintf(stderr, "failed to bind socket (errno %d).\n", errno);
-                wlog("ERROR: failed to bind socket.");
+                w_log("ERROR: failed to bind socket (errno %d.", errno);
                 return EXIT_FAILURE;
         }
 
         if (listen(sfd, 5) < 0) {
                 fprintf(stderr, "failed to listen to socket.\n");
-                wlog("ERROR: failed to listen to socket.");
+                w_log("ERROR: failed to listen to socket.");
                 return EXIT_FAILURE;
         }
 
@@ -105,7 +104,8 @@ int main(void) {
                         if (errno != EINTR) {
                                 fprintf(stderr, "failed to accept connection");
                                 fprintf(stderr, " (errno %d)\n", errno);
-                                wlog("ERROR: failed to accept connection.");
+                                w_log("ERROR: failed to accept connection"
+                                                " (errno %d.", errno);
                                 return EXIT_FAILURE;
                         }
                         continue;
@@ -114,7 +114,7 @@ int main(void) {
                 rfd = read(cfd, buffer, 1023);
                 if (rfd < 0) {
                         fprintf(stderr, "failed to read from buffer.\n");
-                        wlog("ERROR: failed to read from buffer.");
+                        w_log("ERROR: failed to read from buffer.");
                         return EXIT_FAILURE;
                 }
 
@@ -122,7 +122,7 @@ int main(void) {
 
                 if (process_id < 0) {
                         fprintf(stderr, "failed to fork for notification.\n");
-                        wlog("ERROR: failed to fork for notification.");
+                        w_log("ERROR: failed to fork for notification.");
                 }
 
                 if (process_id == 0) {

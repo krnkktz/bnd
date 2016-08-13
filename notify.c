@@ -70,7 +70,7 @@ int notify(char* com) {
 
         if (!s) { /* ignore bad request */
                 fprintf(stderr, "bad request!\n");
-                wlog("ERROR: bad request!");
+                w_log("ERROR: bad request!");
                 return EXIT_FAILURE;
         }
 
@@ -82,7 +82,7 @@ int notify(char* com) {
         dpy = XOpenDisplay(NULL);
         if (!dpy) {
                 fprintf(stderr, "unable to connect to display.\n");
-                wlog("ERROR: unable to connect to display.");
+                w_log("ERROR: unable to connect to display.");
 
                 return EXIT_FAILURE;
         }
@@ -133,7 +133,7 @@ int notify(char* com) {
         texty = (height + text_height)/2;
         Xutf8DrawString(dpy, win, font, pen, textx, texty, text, strlength);
 
-        wlog("wrote some text!");
+        w_log("NOTIFICATION: %s", text);
 
 
         /* waiting for the end */
