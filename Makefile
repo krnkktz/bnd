@@ -4,7 +4,7 @@ FLAGS=-lX11 -Wall -Wextra -std=c89 -pedantic -Wmissing-prototypes \
 	  -Wstrict-prototypes -Wold-style-definition -D_POSIX_C_SOURCE
 
 SOURCES_C=client.c
-SOURCES_D=daemon.c notify.c
+SOURCES_D=daemon.c notify.c log.c
 
 OUTPUT_C=bnd
 OUTPUT_D=bndd

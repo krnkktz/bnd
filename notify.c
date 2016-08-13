@@ -8,6 +8,7 @@
 #include <X11/Xresource.h>
 
 #include "notify.h"
+#include "log.h"
 
 
 int MARGIN=15;
@@ -23,12 +24,6 @@ XFontSet getFont(Display* dpy) {
         XFreeStringList(missing);
         return font;
 }
-
-
-void print_help(_IO_FILE* out) {
-        fprintf(out, "help coming soon\n");
-}
-
 
 int notify(char* com) {
         /* looping stuff */
@@ -75,6 +70,7 @@ int notify(char* com) {
 
         if (!s) { /* ignore bad request */
                 fprintf(stderr, "bad request!\n");
+                wlog("ERROR: bad request!");
                 return EXIT_FAILURE;
         }
 
@@ -85,8 +81,10 @@ int notify(char* com) {
 
         dpy = XOpenDisplay(NULL);
         if (!dpy) {
-                fprintf(stderr, "unable to connect to display\n");\
-                        return EXIT_FAILURE;
+                fprintf(stderr, "unable to connect to display.\n");
+                wlog("ERROR: unable to connect to display.");
+
+                return EXIT_FAILURE;
         }
         screen = DefaultScreen(dpy);
 
@@ -134,6 +132,8 @@ int notify(char* com) {
         textx = (width - text_width)/2;
         texty = (height + text_height)/2;
         Xutf8DrawString(dpy, win, font, pen, textx, texty, text, strlength);
+
+        wlog("wrote some text!");
 
 
         /* waiting for the end */
