@@ -41,8 +41,6 @@ int main(void) {
         }
 
         if (process_id > 0) {
-                fprintf(stdout, "created child process with pid %d.\n",
-                                process_id);
                 w_log("created child process with pid %d.", process_id);
                 return EXIT_SUCCESS;
         }
@@ -50,22 +48,20 @@ int main(void) {
         sid = setsid();
 
         if (sid < 0) {
-                fprintf(stderr, "failed to set sid.\n");
                 w_log("ERROR: failed to set sid.");
                 return EXIT_FAILURE;
         }
 
         chdir("/");
 
-        /*        close(STDIN_FILENO);
-                  close(STDOUT_FILENO);
-                  close(STDERR_FILENO); */
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
 
         /* client communication */
         sfd = socket(AF_UNIX, SOCK_STREAM, 0);
 
         if (sfd < 0) {
-                fprintf(stderr, "failed to create socket.\n");
                 w_log("ERROR: failed to create socket.");
                 return EXIT_FAILURE;
         }
@@ -79,13 +75,11 @@ int main(void) {
 
         if (bind(sfd, (struct sockaddr *) &addr,
                                 sizeof(struct sockaddr_un)) < 0) {
-                fprintf(stderr, "failed to bind socket (errno %d).\n", errno);
                 w_log("ERROR: failed to bind socket (errno %d.", errno);
                 return EXIT_FAILURE;
         }
 
         if (listen(sfd, 5) < 0) {
-                fprintf(stderr, "failed to listen to socket.\n");
                 w_log("ERROR: failed to listen to socket.");
                 return EXIT_FAILURE;
         }
@@ -102,8 +96,6 @@ int main(void) {
                 cfd = accept(sfd, NULL, NULL);
                 if (cfd < 0) {
                         if (errno != EINTR) {
-                                fprintf(stderr, "failed to accept connection");
-                                fprintf(stderr, " (errno %d)\n", errno);
                                 w_log("ERROR: failed to accept connection"
                                                 " (errno %d.", errno);
                                 return EXIT_FAILURE;
@@ -113,7 +105,6 @@ int main(void) {
 
                 rfd = read(cfd, buffer, 1023);
                 if (rfd < 0) {
-                        fprintf(stderr, "failed to read from buffer.\n");
                         w_log("ERROR: failed to read from buffer.");
                         return EXIT_FAILURE;
                 }
@@ -121,7 +112,6 @@ int main(void) {
                 process_id = fork();
 
                 if (process_id < 0) {
-                        fprintf(stderr, "failed to fork for notification.\n");
                         w_log("ERROR: failed to fork for notification.");
                 }
 

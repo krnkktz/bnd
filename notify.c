@@ -69,7 +69,6 @@ int notify(char* com) {
         }
 
         if (!s) { /* ignore bad request */
-                fprintf(stderr, "bad request!\n");
                 w_log("ERROR: bad request!");
                 return EXIT_FAILURE;
         }
@@ -81,7 +80,6 @@ int notify(char* com) {
 
         dpy = XOpenDisplay(NULL);
         if (!dpy) {
-                fprintf(stderr, "unable to connect to display.\n");
                 w_log("ERROR: unable to connect to display.");
 
                 return EXIT_FAILURE;
