@@ -54,9 +54,9 @@ int main(void) {
 
         chdir("/");
 
-        close(STDIN_FILENO);
+/*        close(STDIN_FILENO);
         close(STDOUT_FILENO);
-        close(STDERR_FILENO);
+        close(STDERR_FILENO); */
 
         /* client communication */
         sfd = socket(AF_UNIX, SOCK_STREAM, 0);
