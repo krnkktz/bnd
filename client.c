@@ -15,9 +15,11 @@ void print_help(_IO_FILE* out) {
 int main(int argc, char** argv) {
         /* args */
         int i;
+        char* timeout = "0";
         char* bg_col = "black";
-        char* text;
+        char* text = NULL;
         char* sarg;
+
 
         /* server connection */
         struct sockaddr_un addr;
@@ -38,8 +40,21 @@ int main(int argc, char** argv) {
                                 print_help(stderr);
                                 return EXIT_FAILURE;
                         }
-                } else {
+                } else if (strcmp(argv[i], "-t") == 0
+                                || strcmp(argv[i], "--timeout") == 0) {
+                        if (++i < argc) {
+                                timeout = argv[i];
+                        } else {
+                                fprintf(stderr, "usage:\n");
+                                print_help(stderr);
+                                return EXIT_FAILURE;
+                        }
+                } else if (!text) {
                         text = argv[i];
+                } else {
+                        fprintf(stderr, "usage:\n");
+                        print_help(stderr);
+                        return EXIT_FAILURE;
                 }
         }
 
@@ -62,16 +77,15 @@ int main(int argc, char** argv) {
         }
 
         /* sending the command */
-        sarg = malloc(strlen(bg_col) + strlen(text) + 2);
+
+        sarg = malloc(strlen(timeout) + strlen(bg_col) + strlen(text) + 3);
 
         if (!sarg) {
                 fprintf(stderr, "failed to allocate memory.\n");
                 return EXIT_FAILURE;
         }
 
-        strcpy(sarg, bg_col);
-        strcat(sarg, " ");
-        strcat(sarg, text);
+        sprintf(sarg, "%s %s %s", bg_col, timeout, text);
 
         write(sfd, sarg, strlen(sarg) + 1);
 

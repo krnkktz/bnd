@@ -32,11 +32,14 @@ XFontSet getFont(Display* dpy) {
 int notify(char* com) {
         /* looping stuff */
         unsigned i;
-        int j, s = 0;
+        int j, s1 = 0, s2 = 0;
 
         /* timing stuff */
         int x11_fd;
-        struct timeval tv;
+        struct timeval rtv;
+        struct timeval* tv = &rtv;
+        int timeout;
+        char* stimeout;
         fd_set in_fds;
 
         /* window information */
@@ -65,25 +68,46 @@ int notify(char* com) {
         XFontStruct** fonts;
 
 
+        w_log("REQUEST: %s", com);
 
         /* locale */
         setlocale(LC_ALL, getenv("LANG"));
 
         /* com parser */
-        for (i = 1; i < strlen(com); ++i) {
+        for (i = 0; i < strlen(com); ++i) {
                 if (com[i] == ' ') {
-                        s = i;
+                        s1 = i;
                         com[i] = '\0';
                 }
         }
 
-        if (!s) { /* ignore bad request */
+        bg_col = com;
+
+        w_log("bg_col: \"%s\"", bg_col);
+
+        stimeout = &com[s1+1];
+
+        w_log("stimeout before loop: %s", stimeout);
+
+        for (i = 0; i < strlen(stimeout); ++i) {
+                if (stimeout[i] == ' ') {
+                        s2 = i;
+                        stimeout[i] = '\0';
+                }
+        }
+
+        timeout = strtol(stimeout, NULL, 10);
+
+        text = &stimeout[s2+1];
+
+        w_log("s1: %d, s2: %d, timeout: %d, stimeout: %s, text: %s",
+                        s1, s2, timeout, stimeout, text);
+
+        if (!s1 || !s2) { /* ignore bad request */
                 w_log("ERROR: bad request!");
                 return EXIT_FAILURE;
         }
 
-        bg_col = com;
-        text = &com[s+1];
 
         /* display setup */
 
@@ -152,15 +176,18 @@ int notify(char* com) {
         FD_ZERO(&in_fds);
         FD_SET(x11_fd, &in_fds);
 
-        tv.tv_usec = 0;
-        tv.tv_sec = 10;
-
+        if (timeout > 0) {
+                tv->tv_usec = 0;
+                tv->tv_sec = timeout;
+        } else {
+                tv = NULL;
+        }
 
         XFlush(dpy);
 
         while(1) {
                 w_log("loop");
-                if (!select(x11_fd + 1, &in_fds, NULL, NULL, &tv)) {
+                if (!select(x11_fd + 1, &in_fds, NULL, NULL, tv)) {
                         XCloseDisplay(dpy);
                         w_log("timeout!");
                         return EXIT_SUCCESS;
